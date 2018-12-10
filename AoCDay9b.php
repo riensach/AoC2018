@@ -146,6 +146,8 @@ $var = print_r($marblesPlayed,true);
     //Iterate onto playing the next Marble!!
     if($marblePlay % 1000 ==0) {
         echo "Done marble play $marblePlay<Br>";
+        flush();
+        ob_flush();
     }
     $marblePlay++;
 }

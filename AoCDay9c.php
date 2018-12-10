@@ -8,7 +8,7 @@
 
 $inputData = ("416 players; last marble is worth 71617 points");
 $numberPlayers = 416;
-$targetFinalMarble = 7161700;
+$targetFinalMarble = 71617;
 // Test Data
 //$numberPlayers = 10;
 //$targetFinalMarble = 1618;
@@ -21,7 +21,7 @@ $currentMarbleID = 0;
 
 
 
-$time_pre = microtime(true);
+
 
 // Setup Elf array
 
@@ -30,12 +30,13 @@ while($elfIterator <= $numberPlayers) {
     $elfScores[$elfIterator] = 0;
     $elfIterator++;
 }
-
+global $timerArray;
+$timerArray = array();
 $var = print_r($elfScores,true);
 //echo "<pre>$var</pre>";   
 //die();
 
-
+$time_pre = microtime(true);
 
 
 $marblePlay = 1;
@@ -67,7 +68,8 @@ while($marblePlay <= $targetFinalMarble) {
         //echo "Divides by 23 for marble play $marblePlay. Current marble ID $currentMarbleID. Need to remove marble ID $marbleToRemove (last marble ID=$lastMarbleID) from array with a value of $marbleValue - already given Elf $elfCurrentPlayer $currentMarbleScore points<br>";
         //echo "Need to add $marbleValue to Elf $elfCurrentPlayer<br>";
         $elfScores[$elfCurrentPlayer] = $elfScores[$elfCurrentPlayer]+$marbleValue;
-        array_splice($marblesPlayed, $marbleToRemove, 1);
+        unset($marblesPlayed[$marbleToRemove]);
+        $marblesPlayed = array_values($marblesPlayed);
         //echo "Set current marble ID to be $marbleToRemove<br>";
         $currentMarbleID = $marbleToRemove;
         // Set the marble clockwise of the marble that was just removed to be the current marble
@@ -144,6 +146,9 @@ while($marblePlay <= $targetFinalMarble) {
         $time_post = microtime(true);
         $exec_time = $time_post - $time_pre;
         echo "Done marble play $marblePlay in $exec_time seconds<Br>";
+        $cnt = count($timerArray);
+        $average_of_foo = array_sum($timerArray) / count($timerArray); 
+        echo "Average execution of splice so far is $average_of_foo<br>";
         flush();
         ob_flush();
     }
@@ -152,8 +157,13 @@ while($marblePlay <= $targetFinalMarble) {
 
 
 function moveArray($array,$newKey,$newKeyValue) {
-    
+    global $timerArray;
+    $time_post1 = microtime(true);
     array_splice($array, $newKey, 0, $newKeyValue); 
+    //$array[$newKey] = $newKeyValue; 
+    $time_post2 = microtime(true);
+    $exec_time = $time_post2 - $time_post1;
+    array_push($timerArray,$exec_time);
     return $array;
     
 }
