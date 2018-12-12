@@ -10,8 +10,8 @@ $inputData = ("416 players; last marble is worth 71617 points");
 $numberPlayers = 416;
 $targetFinalMarble = 7161700;
 // Test Data
-//$numberPlayers = 10;
-//$targetFinalMarble = 1618;
+$numberPlayers = 10;
+$targetFinalMarble = 1618;
 
 $marblesPlayed = array(0=>0);
 $elfScores = array();
