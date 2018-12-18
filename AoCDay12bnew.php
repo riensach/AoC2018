@@ -59,9 +59,8 @@ $potIteratorOutput = "...## => #
  * 
  */
 
-
  
-
+$time_pre = microtime(true);
 $potIteratorOutputData = explode("\n",$potIteratorOutput);
 $intialPotData = str_split($initialState,1);
 $potsArray = array();
@@ -80,13 +79,13 @@ $var = print_r($potIterators,true);
 //echo "<pre>$var</pre>";  
 
 // Create the pots!
-for($iterator=(21*-5);$iterator <= ($intialPotCount+(21*5)); $iterator++) {    
+for($iterator=(21*-5);$iterator <= ($intialPotCount+((100))); $iterator++) {    
     $potsArray[$iterator]=($intialPotData[$iterator] ?? ".");
 }
 $var = print_r($potsArray,true);
 //echo "<pre>$var</pre>";   
 
-for($iterator=0;$iterator<20;$iterator++){
+for($iterator=0;$iterator<100;$iterator++){
     $potsArrayIterated = $potsArray;
     foreach($potsArray as $potID => $potValue) {
         if(isset($potsArray[$potID-1]) && isset($potsArray[$potID-2]) && isset($potsArray[$potID+1]) && isset($potsArray[$potID+2])) {
@@ -97,19 +96,28 @@ for($iterator=0;$iterator<20;$iterator++){
             $potsArrayIterated[$potID] = $potAction;
 
             if($potID==3) {
-                //echo $currentPattern."<br>";
+               // echo $currentPattern."<br>";
             }
         }
     }
     $potsArray = $potsArrayIterated;
+    if($iterator % 100000 ==0) {
+            $time_post = microtime(true);
+            $exec_time = $time_post - $time_pre;
+            echo "Done iteration $iterator in $exec_time seconds<Br>";
+            flush();
+            ob_flush();
+        }
 }
 $sumValue = 0;
 foreach($potsArray as $potID => $potValue) {
+    //echo "$potID - $potValue<br>";
     if($potValue=="#") {
-        $sumValue = $sumValue+$potID;
+        $sumValue = $sumValue+$potID+(50000000000-100);
     }
 }
-echo implode($potsArray);
-echo "completed. Sum value: $sumValue";
+//echo implode($potsArray);
+//$totalSum = $sumValue+(50000000000)-$sumValue;
+echo "completed. Sum value: $sumValue - now calculated to 50b";
 $var = print_r($potsArray,true);
 echo "<pre>$var</pre>";  

@@ -58,11 +58,11 @@ $potIteratorOutput = "...## => #
 ####. => #";
  * 
  */
-
+$time_pre = microtime(true);
 $potIteratorOutputData = explode("\n",$potIteratorOutput);
 $intialPotData = str_split($initialState,1);
-$potsArray = array();
-$potsArrayIterated = array();
+$potsArray = new \Ds\Map();
+$potsArrayIterated = new \Ds\Map();
 $intialPotCount = count($intialPotData);
 $potIterators = array();
 
@@ -77,22 +77,23 @@ $var = print_r($potIterators,true);
 //echo "<pre>$var</pre>";  
 
 // Create the pots!
-for($iterator=(-20);$iterator <= ($intialPotCount+(500000)); $iterator++) {    
-    $potsArray[$iterator]=($intialPotData[$iterator] ?? ".");
+for($iterator=(-105);$iterator <= ($intialPotCount+(105)); $iterator++) {    
+    $potAction=($intialPotData[$iterator] ?? ".");
+    $potsArray->put($iterator, $potAction);
 }
 echo "goit this far!";
 $var = print_r($potsArray,true);
 //echo "<pre>$var</pre>";   
 
-for($iterator=0;$iterator<50000000000;$iterator++){
+for($iterator=0;$iterator<20;$iterator++){
     $potsArrayIterated = $potsArray;
     foreach($potsArray as $potID => $potValue) {
         if(isset($potsArray[$potID-1]) && isset($potsArray[$potID-2]) && isset($potsArray[$potID+1]) && isset($potsArray[$potID+2])) {
             // It's a real pot. We probably shouldn't need this check, but we do. Either way lets live with it, I'm not smart enough to not need it
-            $currentPattern = $potsArray[$potID-2].$potsArray[$potID-1].$potsArray[$potID].$potsArray[$potID+1].$potsArray[$potID+2];
+            $currentPattern = $potsArray->get($potID-2).$potsArray->get($potID-1).$potsArray->get($potID).$potsArray->get($potID+1).$potsArray->get($potID+2);
 
             $potAction = ($potIterators[$currentPattern] ?? ".");
-            $potsArrayIterated[$potID] = $potAction;
+            $potsArrayIterated->put($potID, $potAction);
 
             if($potID==3) {
                 echo $currentPattern."<br>";
@@ -107,7 +108,8 @@ foreach($potsArray as $potID => $potValue) {
         $sumValue = $sumValue+$potID;
     }
 }
-
-echo "completed. Sum value: $sumValue";
+$time_post = microtime(true);
+        $exec_time = $time_post - $time_pre;
+echo "took $exec_time to completed. Sum value: $sumValue";
 $var = print_r($potsArray,true);
 echo "<pre>$var</pre>";  
