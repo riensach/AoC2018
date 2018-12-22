@@ -1211,125 +1211,276 @@ foreach($rowStartingValues as $rowID => $rowData) {
     }
     
 }
-printGrid($gridData);
+//printGrid($gridData);
 // Now we're all setup, we just need to loop (just) through the data and process the changes in the water
-$row = 0; // Y
-$column = 500; // X
+//$row = 0; // Y
+//$column = 500; // X
 // Water flows down, so that's using Rows
-for($iteration=0;$iteration<=10000;$iteration++) {
-    if(isset($gridData[$row+1][$column]) && isset($gridData[$row+2][$column])) {
-        
+
+waterStream();
+cleanup();
+// 492 x 64
+function waterStream($row = 0,$column = 500) {
+    global $gridData;
     
-        if($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='.') {
-            $gridData[$row+1][$column] = '|';
-        } elseif($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='#') {
-            $gridData[$row+1][$column] = '~';
-            $stopRight = 0;
-            $stopLeft = 0;
-            $wallLeft = 0;
-            $wallRight = 0;
-            $continueRight = 0;
-            $continueLeft = 0;
-            $fillBox=0;
-            $newColumn=0;
-            while($fillBox<100) {
-                if(!isset($gridData[$row+1][$column+$fillBox]) || !isset($gridData[$row+1][$column-$fillBox])) {
-                    break;
-                }
-                if($continueLeft==0 && isset($gridData[$row+1][$column-$fillBox-1])) {
-                    if($gridData[$row+1][$column-$fillBox]=='.' && $gridData[$row+1][$column-$fillBox-1]=='.' && $stopLeft==0 && $wallLeft==$column-$fillBox) {
-                        $gridData[$row+1][$column-$fillBox] = '|';
-                        $gridData[$row+1][$column-$fillBox-1] = '|';
-                        $newColumn=$column-$fillBox-1;
-                        $wallLeft=0;
-                        $stopLeft = 1;
-                        $continueLeft = 1;
-                    } elseif($gridData[$row+1][$column-$fillBox]=='.' && $stopLeft==0 && $wallLeft==$column-$fillBox) {
-                        $gridData[$row+1][$column-$fillBox] = '|';
-                        $wallLeft=0;
-                    } elseif($gridData[$row+1][$column-$fillBox]=='.' && $stopLeft==0) {
-                        $gridData[$row+1][$column-$fillBox] = '~';
-                    } elseif($gridData[$row+1][$column-$fillBox]=='|' && $stopLeft==0) {
-                        $gridData[$row+1][$column-$fillBox] = '~';
-                    } elseif ($gridData[$row+1][$column-$fillBox]=='#' && $stopLeft==0) {
-                        // Found the wall
-                        $wallLeft = $column-$fillBox;
-                        $stopLeft = 1;
-                    } elseif ($gridData[$row+1][$column-$fillBox]=='#' || $stopLeft==1) {
-                        // Stop left
-                        $stopLeft = 1;
-                    }
-                }
-                if($continueRight==0 && isset($gridData[$row+1][$column+$fillBox+1])) {
-                    if($gridData[$row+1][$column+$fillBox]=='.' && $gridData[$row+1][$column+$fillBox+1]=='.' && $stopRight==0 && $wallRight==$column+$fillBox) {
-                        $gridData[$row+1][$column+$fillBox] = '|';
-                        $gridData[$row+1][$column+$fillBox+1] = '|';
-                        $newColumn=$column+$fillBox+1;
-                        $wallRight=0;                    
-                        $stopRight = 1;
-                        $continueRight = 1;
-                    } elseif($gridData[$row+1][$column+$fillBox]=='.' && $stopRight==0 && $wallRight==$column+$fillBox) {
-                        $gridData[$row+1][$column+$fillBox] = '|';
-                        $wallRight=0;
-                    } elseif($gridData[$row+1][$column+$fillBox]=='.' && $stopRight==0) {
-                        $gridData[$row+1][$column+$fillBox] = '~';
-                    } elseif($gridData[$row+1][$column+$fillBox]=='|' && $stopRight==0) {
-                        $gridData[$row+1][$column+$fillBox] = '~';
-                    } elseif ($gridData[$row+1][$column+$fillBox]=='#' && $stopRight==0) {
-                        // Found the wall
-                        $wallRight = $column+$fillBox;
-                        $stopRight = 1;
-                    } elseif ($gridData[$row+1][$column+$fillBox]=='#' || $stopRight==1) {
-                        // Stop right
-                        $stopRight = 1;
-                    }
-                }
-                $fillBox++;
-                if($stopLeft==1 && $stopRight==1 && $continueLeft==0 && $continueRight==0) {
-                    $row--;
-                    $fillBox=0;
-                    $stopLeft=0;
-                    $stopRight=0;
-                    
-                    
-                }
+    for($iteration=0;$iteration<=1000;$iteration++) {
+
+       // $gridData[63][492] = 'X';
+        if(isset($gridData[$row+1][$column]) && isset($gridData[$row+2][$column])) {
+            if($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='.' && $gridData[$row][$column]!='#') {
+                $gridData[$row+1][$column] = '|';
+            } elseif($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='.' && $gridData[$row][$column]=='#') {
+               // break;
                 
-                if($continueLeft==1 || $continueRight==1 && ($stopLeft==1 && $stopRight==1)) {
-                    $column = $newColumn;
-                    //$wallLeft=0;
-                    //$wallRight = 0;
-                }
-                
-                if($continueLeft==1 && $continueRight==1) {
-                    break;
-                }
-            }
+            //} elseif($gridData[$row+1][$column]=='|' && $gridData[$row+2][$column]=='|') {
+                //break;
+            } elseif($gridData[$row+1][$column]=='~' && $gridData[$row+2][$column]=='~' && $gridData[$row][$column]!='#' && $gridData[$row][$column]!='~') {
+                $gridData[$row][$column] = '|';
+               // break;
+            } elseif(($gridData[$row+1][$column]=='|') && ($gridData[$row+2][$column]=='#' || $gridData[$row+2][$column]=='#')) {
+                // Already got someone here, lets end this now
+                //$gridData[$row][$column] = '~';
+               // echo "got here";
+                break;
+            } elseif(($gridData[$row+1][$column]=='~') && ($gridData[$row+2][$column]=='~' || $gridData[$row+2][$column]=='#')) {
+                // Already got someone here, lets end this now
+                $gridData[$row][$column] = '~';
+                $gridData[$row-2][$column] = '|';
+                $column+1;
+                //echo "got here2";
+                break;
+            } elseif($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='#' && $gridData[$row+2][$column+1]!='#' && $gridData[$row+2][$column-1]!='#' && $gridData[$row][$column]!='#') {
+                //$column = $column-1;  
+                $gridData[$row+1][$column] = '|';
+                waterStream($row,$column+1);                
+                waterStream($row,$column-1);
+                break;
+            } elseif(($gridData[$row+1][$column]=='.' && $gridData[$row+2][$column]=='#' && $gridData[$row+2][$column+1]=='#' && $gridData[$row+2][$column-1]=='#' && $gridData[$row][$column]!='#') || (($gridData[$row+1][$column]=='~') && ($gridData[$row][$column]=='|') && ($gridData[$row+2][$column]=='~') && ($gridData[$row+2][$column]=='#' || $gridData[$row+2][$column]=='#'))) {
             
+                $startingColumn = $column;
+                $leftColumn = 0;
+                $topLeft = 0;
+                $rightColumn = 0;
+                $topRight = 0;
+                // Find left wall
+                $foundLeft = 0;
+                $iteration = 0;                    
+                while($foundLeft < 1) {
+                    if($gridData[$row+1][$column-$iteration]=='#') {
+                        //Left found!
+                        $leftColumn = $column-$iteration;
+                        //$gridData[$row+1][$column-$iteration] = 'X';
+                        $foundLeft=1;
+                    }
+                    $iteration++;
+                }
+                // Find top left wall
+                $foundTopLeft = 0;
+                $iteration = 0;                    
+                while($foundTopLeft < 1) {
+                    if($gridData[$row+1-$iteration][$leftColumn]!='#') {
+                        //Top left found!
+                        $topLeft = $row+1-$iteration;
+                        //$gridData[$row-$iteration][$leftColumn] = '|';
+                        $foundTopLeft=1;
+                    }
+                    $iteration++;
+                }
+                // Find right wall
+                $foundRight = 0;
+                $iteration = 0;                    
+                while($foundRight < 1) {
+                    if($gridData[$row+1][$column+$iteration]=='#') {
+                        //Right found!
+                        $rightColumn = $column+$iteration;
+                        //$gridData[$row+1][$column+$iteration] = 'X';
+                        $foundRight=1;
+                    }
+                    $iteration++;
+                }
+
+                // Find top right wall
+                $foundTopRight = 0;
+                $iteration = 0;                    
+                while($foundTopRight < 1) {
+                    if($gridData[$row+1-$iteration][$rightColumn]!='#') {
+                        //Top right found!
+                        $topRight = $row+1-$iteration;
+                        //$gridData[$row-$iteration][$rightColumn] = '|';
+                        $foundTopRight=1;
+                    }
+                    $iteration++;
+                }
+                
+                $leftColumn = $leftColumn;
+                $rightColumn = $rightColumn;
+                $workingRow = $row+1;
+                $topRow = $topLeft;
+                if($topLeft<$topRight) {
+                   $topRow = $topRight; 
+                }
+                
+                
+                
+                
+                $boxArray = array();
+                while($workingRow >= $topRow) {                    
+                    $workingColumn = $leftColumn;
+                    $foundBox = 0;
+                    $closedBox = 0;
+                    while($workingColumn <= $rightColumn) {   
+                        if($gridData[$workingRow][$workingColumn]!='#' && $foundBox !=1 && !array_key_exists("$workingRow,$workingColumn", $boxArray)) {
+                            $gridData[$workingRow][$workingColumn] = '~';
+                            if($workingRow==$topRow) {
+                                $gridData[$workingRow][$workingColumn] = '|';
+                            }
+                            if($gridData[$workingRow+1][$workingColumn]=='.') {
+                                waterStream($workingRow+1,$workingColumn);  
+                            }
+                            // Found a box above?
+                            if($gridData[$workingRow-1][$workingColumn]=="#"){
+                                // Found a box above. Mark it as found. We want to save the left/right side, and work out the height
+                                $boxArray["$workingRow,$workingColumn"] = "$workingColumn";
+                                if(count($boxArray)==1) {
+                                    // First time we've found something, lets get the height
+                                    $foundTopBox = 0;
+                                    $foundTopBoxPosition = 0;
+                                    $iteration = 1;                    
+                                    while($foundTopBox < 1) {
+                                        if($gridData[$workingRow-$iteration][$workingColumn]!='#') {
+                                            //Top right found!
+                                            $foundTopBoxPosition = $workingRow-$iteration;
+                                            //$gridData[$row-$iteration][$rightColumn] = '|';
+                                            $foundTopBox=1;
+                                            if($gridData[$workingRow-$iteration+1][$workingColumn+1]=='#') {
+                                                $closedBox = 1;
+                                            }
+                                        }
+                                        $iteration++;
+                                    }
+                                }
+                            }                            
+                        }
+                        $workingColumn++;
+                    }
+                    
+                    if(count($boxArray)>0) {
+                        // We have found a box
+                        // Calculate if the found box is higher than our left/right column                            
+                        $boxHeight = $foundTopBoxPosition;
+                        if($boxHeight >= $topRow) {
+                            // Do nothing - the box ends before we get to the top and we want to fill it anyway
+                            // We need to check if it is a closed box before we do nothing                            
+                            if($closedBox > 0) {                                
+                                // It's a closed box - we want to not fill it
+                                $boxRow = $workingRow-1;
+                                $boxColumn = reset($boxArray);
+                                $lastBoxColumn = end($boxArray);
+                                while($boxRow > $foundTopBoxPosition) {
+                                    while($boxColumn <= $lastBoxColumn) {
+                                        $boxArray["$boxRow,$boxColumn"] = "$boxColumn";
+                                        $boxColumn++;
+                                    }                                    
+                                    $boxColumn = reset($boxArray);
+                                    $boxRow--;
+                                }
+                            }
+
+                        } else {
+                            // The box doesn't end, so we need to fix our columns
+                            if(abs($leftColumn-$startingColumn)>abs($rightColumn-$startingColumn)) {
+                                $leftColumn = end($boxArray);
+                                $topRow = $topRight;
+                            } else {
+                                $rightColumn = reset($boxArray);
+                                $topRow = $topLeft;
+                            }
+                        }
+                    }
+                    
+                    $workingRow--;                    
+                }
+                
+                
+                if($topLeft==$topRight) {
+                    // Must branch!
+                    waterStream($topRight-1,$rightColumn+1);
+                    waterStream($topLeft-1,$leftColumn-1);
+                    break;
+                } elseif($topRow==$topLeft) {
+                    $column = $leftColumn-1; 
+                    $row = $topLeft-2;
+                    //break;
+                } else {
+                    $column = $rightColumn+1; 
+                    $row = $topRight-2;
+                    //continue;
+                }
+                
+                
+                    
+
+
+            }
+            $row++;
 
         }
-        $row++;
-        
-    }
-    
-    
-    
-} 
 
+
+
+    } 
+}
+
+function cleanup() {
+
+    global $gridData;
+    
+    for($iteration=0;$iteration<=10;$iteration++) {  
+        for($c=480;$c<=700;$c++) {  
+            for($r=0;$r<=5000;$r++) {  
+                $currentGrid = ($gridData[$r][$c] ?? 'X');
+                $gridBelow = ($gridData[$r+1][$c] ?? 'X');
+                if($currentGrid=='~' && $gridBelow=='.') {
+                    $gridData[$r+1][$c] = '~';
+                }
+            }
+        }
+    }
+}
 
 echo "<br><br>";
 
 
+// 35169 = too high
+// 32528 = too low
 
+// 5 found missing so far
+// 3 extra
+// 14 below line do not count
+// 4 above line do not count
+// 33020 +2 - 18
+// 33004
 
-
+// 
 // Finally, we need to count the number of tiles that the water has reached
 
+// Part 1 : 33004 ; part 2: 23294
 // When doing this, ignore Row 0 and any rows past the maximum water length
 // Do count all the columns
+$waterCount = 0;
+$waterCountRetained = 0;
+//for($c=0;$c<=$longestY+3;$c++) {
+  //  for($r=$shortestX-1;$r<=$longestX+1;$r++) {
+        
+ foreach ($gridData as $c => $value)       { 
+     foreach ($value as $r => $value2)       { 
+ 
+        if($gridData[$c][$r]=="~" || $gridData[$c][$r]=="|") $waterCount++;
+        if($gridData[$c][$r]=="~") $waterCountRetained++;
+    }    
+}
 
-
-
-
+echo "<br>Water reaches a total of $waterCount squares && retained water = $waterCountRetained<Br>";
 
 
 
@@ -1348,4 +1499,4 @@ function printGrid($currentArray) {
     
 }
 $var = print_r($rowStartingValues,true);
-echo "<pre>$var</pre>";  
+//echo "<pre>$var</pre>";  
