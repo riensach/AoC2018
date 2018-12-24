@@ -23,12 +23,12 @@ for($r=0;$r<=$targetY;$r++) {
         $caveGridArray[$r][$c] = "#";
         if($c==0 && $r==0) {
             $geoIndex = 0;
-        } elseif($c==$targetY && $r==$targetX) {
-            $geoIndex = 0;
         } elseif($c==0) {
             $geoIndex = $r * 16807;
         } elseif($r==0) {
             $geoIndex = $c * 48271;
+        } elseif($c==$targetX && $r==$targetY) {
+            $geoIndex = 0;
         } else {
             $erosionLevelLeft = ($caveGridArrayGeoIndex[$r][$c-1] + $caveDepth) % 20183;
             $erosionLevelAbove = ($caveGridArrayGeoIndex[$r-1][$c] + $caveDepth) % 20183;

@@ -22,7 +22,7 @@ for($r=0;$r<=$targetY+5;$r++) {
         $caveGridArray[$r][$c] = "#";
         if($c==0 && $r==0) {
             $geoIndex = 0;
-        } elseif($c==$targetY && $r==$targetX) {
+        } elseif($c==$targetX && $r==$targetY) {
             $geoIndex = 0;
         } elseif($c==0) {
             $geoIndex = $r * 16807;
@@ -71,158 +71,213 @@ $timeToTargetArray = array();
 //$caveGridArray[10][10] = 'T';
 
 
-
+$time_pre = microtime(true);
 printGrid($caveGridArray);
 
 flush();
 ob_flush();
-moveLocation($caveGridArray,0,0,$targetY,$targetX,0,0,0,1,array());
-
+moveLocation($caveGridArray,0,0,$targetY,$targetX,0,0,0,1,array(),$timeToTargetArray,1);
+$time_post = microtime(true);
+            $exec_time = $time_post - $time_pre;
+            echo "Done in $exec_time seconds<Br>";
 
 $var = print_r($timeToTargetArray,true);
 echo "<pre>$var</pre>";  
 
 // For equipped item
-// 0 = neither, 1 = torch, 2 = rope
+// 0 = neither, 1 = torch, 2 = climbing gear
 
 
-function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, $targetColumn, $lastRow, $lastColumn, $totalMoveMinutes, $equippedItem, $previousLocations) {
+function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, $targetColumn, $lastRow, $lastColumn, $totalMoveMinutes, $equippedItem, $previousLocations, &$timeToTargetArray, $moveCount) {
     if($currentRow==$targetRow & $currentColumn==$targetColumn) {
         // We made it to the target
         // Add this to the array and break
-        $timeToTargetArray = $totalMoveMinutes;
-        $caveGridArray[$targetRow][$targetColumn] = 'T';
+        if($equippedItem!=1) {
+            // Need to equip the torch!
+            $totalMoveMinutes = $totalMoveMinutes + 7;
+        }
+        $timeToTargetArray[] = $totalMoveMinutes;
+        //$caveGridArray[$targetRow][$targetColumn] = 'T';
+        echo "WE FOUND IT!!!";
         return;
     }
-    if($totalMoveMinutes>45) {
-        return;
-    }
-    $travelOptions = 0;
-    $targetLocation = $currentRow .",". $currentColumn-1;
-    if(isset($caveGridArray[$currentRow][$currentColumn-1]) && !($currentRow==$lastRow && $currentColumn-1==$lastColumn) && !in_array($targetLocation,$previousLocations)) {
+
+    $proposedColumn = $currentColumn-1;
+    $proposedRow = $currentRow;
+    $targetLocation = "$proposedRow,$proposedColumn";  
+    $alreadyUsed = (in_array($targetLocation,$previousLocations)<1 ? 0:1);
+    $newPreviousLocations = array_merge($previousLocations,array(0=>"$currentRow,$currentColumn"));
+   //echo "FAKE PREVIOUS LOCATION - $targetLocation :: $currentRow,$currentColumn<Br>";
+   $found = in_array($targetLocation,$previousLocations);
+   // if(array_search($targetLocation,$previousLocations)){
+    //    echo "PREVIOUS LOCATION - $targetLocation<Br>";
+    
+   if($moveCount > 260) {
+       // To long, go away
+       $var = print_r($newPreviousLocations,true);
+echo "<pre>$var</pre>";  
+       return;
+   }
         
+   // }
+   // echo "query finds $found - $alreadyUsed<br>";
+    //echo "Last: $lastRow,$lastColumn - Current: $currentRow,$currentColumn - Proposed: $targetLocation<br>";
+    $moveCount++;
+    if(isset($caveGridArray[$currentRow][$currentColumn-1]) && $alreadyUsed<1) {
+        //echo "mad4e it here - equiped item is $equippedItem<br>";
         // This location exists, and it's not where we just came from
-        $travelOptions++;
-        $terrain = $caveGridArray[$currentRow][$currentColumn-1];
-        if($terrain=='.' && $equippedItem==0){
+        $currentTerrain = $caveGridArray[$currentRow][$currentColumn];
+        $targetTerrain = $caveGridArray[$currentRow][$currentColumn-1];
+        if($targetTerrain=='.' && $equippedItem==0){
             // Rocky region and I have nothing equippet. Must equip something
-            $equippedItem = rand(1,2);
-            $totalMoveMinutes++;
-        } elseif($terrain=='=' && $equippedItem==1){
+            if($currentTerrain=='='){
+                $equippedItem = 2;
+            } else {
+                $equippedItem = 1;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;
+        } elseif($targetTerrain=='=' && $equippedItem==1){
             // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 2; 
-            } 
-            $totalMoveMinutes++;           
-        } elseif($terrain=='|' && $equippedItem==2){
+            if($currentTerrain=='|'){
+                $equippedItem = 0;
+            } else {
+                $equippedItem = 2;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;          
+        } elseif($targetTerrain=='|' && $equippedItem==2){
             // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 1; 
+            if($currentTerrain=='.'){
+                $equippedItem = 1;
+            } else {
+                $equippedItem = 0;
+            }  
+            $totalMoveMinutes = $totalMoveMinutes + 7;       
+        }
+        //echo "new equip = $equippedItem based on current $currentTerrain and target $targetTerrain <br>";
+        $totalMoveMinutes++; 
+        moveLocation($caveGridArray,$currentRow,$currentColumn-1,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations,$timeToTargetArray,$moveCount);        
+    }
+    $proposedColumn = $currentColumn;
+    $proposedRow = $currentRow-1;
+    $targetLocation = "$proposedRow,$proposedColumn"; 
+    $alreadyUsed = (in_array($targetLocation,$previousLocations)<1 ? 0:1);
+    if(isset($caveGridArray[$currentRow-1][$currentColumn]) && $alreadyUsed<1) {
+        // This location exists, and it's not where we just came from
+        $currentTerrain = $caveGridArray[$currentRow][$currentColumn];
+        $targetTerrain = $caveGridArray[$currentRow-1][$currentColumn];
+        if($targetTerrain=='.' && $equippedItem==0){
+            // Rocky region and I have nothing equippet. Must equip something
+            if($currentTerrain=='='){
+                $equippedItem = 2;
+            } else {
+                $equippedItem = 1;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;  
+        } elseif($targetTerrain=='=' && $equippedItem==1){
+            // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
+            if($currentTerrain=='|'){
+                $equippedItem = 0;
+            } else {
+                $equippedItem = 2;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;            
+        } elseif($targetTerrain=='|' && $equippedItem==2){
+            // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
+            if($currentTerrain=='.'){
+                $equippedItem = 1;
+            } else {
+                $equippedItem = 0;
             }   
-            $totalMoveMinutes++;         
+            $totalMoveMinutes = $totalMoveMinutes + 7;          
         }
         $totalMoveMinutes++; 
-        $newPreviousLocations = array_merge($previousLocations,array(0=>"$currentRow,$currentColumn"));
-        moveLocation($caveGridArray,$currentRow,$currentColumn-1,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations);        
+        moveLocation($caveGridArray,$currentRow-1,$currentColumn,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations,$timeToTargetArray,$moveCount);        
     }
-    $targetLocation = $currentRow-1 .",". $currentColumn;
-    if(isset($caveGridArray[$currentRow-1][$currentColumn]) && !($currentRow-1==$lastRow && $currentColumn==$lastColumn) && !in_array($targetLocation,$previousLocations)) {
+    $proposedColumn = $currentColumn+1;
+    $proposedRow = $currentRow;
+    $targetLocation = "$proposedRow,$proposedColumn"; 
+    $alreadyUsed = (in_array($targetLocation,$previousLocations)<1 ? 0:1);
+    if(isset($caveGridArray[$currentRow][$currentColumn+1]) && $alreadyUsed<1) {
         // This location exists, and it's not where we just came from
-        $travelOptions++;
-        $terrain = $caveGridArray[$currentRow-1][$currentColumn];
-        if($terrain=='.' && $equippedItem==0){
+        $currentTerrain = $caveGridArray[$currentRow][$currentColumn];
+        $targetTerrain = $caveGridArray[$currentRow][$currentColumn+1];
+        if($targetTerrain=='.' && $equippedItem==0){
             // Rocky region and I have nothing equippet. Must equip something
-            $equippedItem = rand(1,2);
-            $totalMoveMinutes++;
-        } elseif($terrain=='=' && $equippedItem==1){
+            if($currentTerrain=='='){
+                $equippedItem = 2;
+            } else {
+                $equippedItem = 1;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;  
+        } elseif($targetTerrain=='=' && $equippedItem==1){
             // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 2; 
-            } 
-            $totalMoveMinutes++;           
-        } elseif($terrain=='|' && $equippedItem==2){
+            if($currentTerrain=='|'){
+                $equippedItem = 0;
+            } else {
+                $equippedItem = 2;
+            }
+            $totalMoveMinutes = $totalMoveMinutes + 7;             
+        } elseif($targetTerrain=='|' && $equippedItem==2){
             // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 1; 
-            }   
-            $totalMoveMinutes++;         
+            if($currentTerrain=='.'){
+                $equippedItem = 1;
+            } else {
+                $equippedItem = 0;
+            }  
+            $totalMoveMinutes = $totalMoveMinutes + 7;          
+        }
+        $totalMoveMinutes++;       
+        moveLocation($caveGridArray,$currentRow,$currentColumn+1,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations,$timeToTargetArray,$moveCount);        
+    }
+    $proposedColumn = $currentColumn;
+    $proposedRow = $currentRow+1;
+    $targetLocation = "$proposedRow,$proposedColumn"; 
+    $alreadyUsed = (in_array($targetLocation,$previousLocations)<1 ? 0:1);
+    if(isset($caveGridArray[$currentRow+1][$currentColumn]) && $alreadyUsed<1) {
+        // This location exists, and it's not where we just came from
+        $currentTerrain = $caveGridArray[$currentRow][$currentColumn];
+        $targetTerrain = $caveGridArray[$currentRow+1][$currentColumn];
+        if($targetTerrain=='.' && $equippedItem==0){
+            // Rocky region and I have nothing equippet. Must equip something
+            if($currentTerrain=='='){
+                $equippedItem = 2;
+            } else {
+                $equippedItem = 1;
+            }
+            $totalMoveMinutes = $totalMoveMinutes +7;  
+        } elseif($targetTerrain=='=' && $equippedItem==1){
+            // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
+            if($currentTerrain=='|'){
+                $equippedItem = 0;
+            } else {
+                $equippedItem = 2;
+            }
+            $totalMoveMinutes = $totalMoveMinutes +7;            
+        } elseif($targetTerrain=='|' && $equippedItem==2){
+            // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
+            if($currentTerrain=='.'){
+                $equippedItem = 1;
+            } else {
+                $equippedItem = 0;
+            } 
+            $totalMoveMinutes = $totalMoveMinutes +7;          
         }
         $totalMoveMinutes++; 
-        $newPreviousLocations = array_merge($previousLocations,array(0=>"$currentRow,$currentColumn"));
-        moveLocation($caveGridArray,$currentRow-1,$currentColumn,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations);        
-        if($travelOptions>1) {
-            // We already have a valid travel option here, so lets branch
-        }
+        moveLocation($caveGridArray,$currentRow+1,$currentColumn,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations,$timeToTargetArray,$moveCount);        
     }
-    $targetLocation = $currentRow .",". $currentColumn+1;
-    if(isset($caveGridArray[$currentRow][$currentColumn+1]) && !($currentRow==$lastRow && $currentColumn+1==$lastColumn) && !in_array($targetLocation,$previousLocations)) {
-        // This location exists, and it's not where we just came from
-        $travelOptions++;
-        $terrain = $caveGridArray[$currentRow][$currentColumn+1];
-        if($terrain=='.' && $equippedItem==0){
-            // Rocky region and I have nothing equippet. Must equip something
-            $equippedItem = rand(1,2);
-            $totalMoveMinutes++;
-        } elseif($terrain=='=' && $equippedItem==1){
-            // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 2; 
-            } 
-            $totalMoveMinutes++;           
-        } elseif($terrain=='|' && $equippedItem==2){
-            // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
-            $random = rand(1,2);
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 1; 
-            }   
-            $totalMoveMinutes++;         
-        }
-        $totalMoveMinutes++;   
-        $newPreviousLocations = array_merge($previousLocations,array(0=>"$currentRow,$currentColumn"));      
-        moveLocation($caveGridArray,$currentRow,$currentColumn+1,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations);        
+    
+    //echo "So - total move minutes = $totalMoveMinutes - $currentRow,$currentColumn - $targetLocation<br>";
+    /*if(!isset($newPreviousLocations)) {
+       echo "FOUND AN END! $totalMoveMinutes - $currentRow,$currentColumn - $targetLocation <br>" ;
+       print_r($previousLocations);
+       echo "<br>";
+    } else {
+         print_r($newPreviousLocations);
     }
-    $targetLocation = $currentRow+1 .",". $currentColumn;
-    if(isset($caveGridArray[$currentRow+1][$currentColumn]) && !($currentRow+1==$lastRow && $currentColumn==$lastColumn) && !in_array($targetLocation,$previousLocations)) {
-        // This location exists, and it's not where we just came from
-        $travelOptions++;
-        $terrain = $caveGridArray[$currentRow+1][$currentColumn];
-        if($terrain=='.' && $equippedItem==0){
-            // Rocky region and I have nothing equippet. Must equip something
-            $equippedItem = rand(1,2);
-            $totalMoveMinutes++;
-        } elseif($terrain=='=' && $equippedItem==1){
-            // Wet region and I have the torch equippment. Must equip either nothing or rope. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 2; 
-            } 
-            $totalMoveMinutes++;           
-        } elseif($terrain=='|' && $equippedItem==2){
-            // Narrow region and I have the rope equippment. Must equip either nothing or torch. Going to random it
-            $random = rand(1,2);
-            $equippedItem = 0;
-            if($random==1) {
-               $equippedItem = 1; 
-            }   
-            $totalMoveMinutes++;         
-        }
-        $totalMoveMinutes++; 
-        $newPreviousLocations = array_merge($previousLocations,array(0=>"$currentRow,$currentColumn"));
-        moveLocation($caveGridArray,$currentRow+1,$currentColumn,$targetRow,$targetColumn,$currentRow,$currentColumn,$totalMoveMinutes,$equippedItem,$newPreviousLocations);        
-    }
+           
+    echo "<br>";
+     * 
+     */
     
     
     
