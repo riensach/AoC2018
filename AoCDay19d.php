@@ -53,7 +53,7 @@ $instructionPointer = 0;
 
  
 $instructionPointerValue = 0; 
-$registerValues = array(0=>0,1=>0,2=>0,3=>0,4=>0,5=>0);
+$registerValues = array(0=>1,1=>0,2=>0,3=>0,4=>0,5=>0);
 
 $puzzleRows = explode("\n",$trackGridInput);
 $instructions = array();
@@ -74,7 +74,39 @@ while($instructionID < count($puzzleRows)) {
     $outputC = $instructions[$instructionID][3];
     $registerValues[$instructionPointer] = $instructionPointerValue;
     //echo "Opcode: $opcode Before :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br>";
-
+    //if($instructionPointerValue==8){
+    //    $registerValues[3] = $registerValues[2];
+    //}
+    //if($instructionPointerValue==13){
+    //    $registerValues[4] = $registerValues[2] + 1;
+   // }
+    //if($registerValues[4]>=$registerValues[2]){
+    //    $registerValues[4] = $registerValues[3] + 1;
+        //echo "SPECIAL Opcode: $opcode Before :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br>";
+    
+   //}
+    
+    if($instructionPointerValue==2 && $registerValues[4] <> 0){
+        if($registerValues[2] % $registerValues[4] == 0) {
+            $registerValues[0] = $registerValues[0] + $registerValues[4];
+        }
+        
+        $registerValues[1] = 1;
+        $registerValues[3] = $registerValues[2];
+        $instructionPointerValue = 12;
+        continue;
+    }
+    
+    
+    
+    
+    
+    //echo "Opcode: $opcode Before :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br>";
+    
+    //if($instructionPointerValue==7 || $instructionPointerValue==34){
+        
+    //}
+    
     if($opcode=='addr') {        
         // OppCode - addr - C=A+B
         $testValue = $registerValues[$inputA] + $registerValues[$inputB];
@@ -142,22 +174,31 @@ while($instructionID < count($puzzleRows)) {
     } else {
         echo "ERRORRR";
     }
-    //echo "After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
+    //if($instructionPointerValue==7 || $instructionPointerValue==34){
+    if($registerValues[4]>=$registerValues[2]){
+        //echo "SPECIAL After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
+    }
+   // echo "After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
     
+    //}
     $instructionPointerValue = $registerValues[$instructionPointer];
     $instructionPointerValue++;
     $instructionID = $instructionPointerValue;
     $iterations++;
     
-    if($iterations % 10000000 ==0) {
+    if($iterations % 1000000 ==0) {
         $time_post = microtime(true);
         $exec_time = $time_post - $time_pre;
         echo "Done iteration $iterations in $exec_time seconds<Br>";
-       // flush();
-        //ob_flush();
+        echo "Iteration $iterations After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: 1:".$registerValues[0]." 2:".$registerValues[1]." 3:".$registerValues[2]." 4:".$registerValues[3]." 5:".$registerValues[4]." 6:".$registerValues[5]."<br><br>";
+    
+        flush();
+        ob_flush();
     }
     
 }
+// fdirst = 1872
+// second = 18992592 18999995
 
 
 echo "$iterations -- After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";

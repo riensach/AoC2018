@@ -48,7 +48,7 @@ $instructionPointer = 0;
 
  
 $instructionPointerValue = 0; 
-$registerValues = array(0=>7,1=>0,2=>0,3=>0,4=>0,5=>0);
+$registerValues = array(0=>6534225,1=>0,2=>0,3=>0,4=>0,5=>0);
 
 $puzzleRows = explode("\n",$trackGridInput);
 $instructions = array();
@@ -61,18 +61,34 @@ $var = print_r($instructions,true);
 //echo "<pre>$var</pre>"; 
 $instructionID = 0;
 //for($i=60000000;$i<100000000;$i++) {
-
+// Part 1 = 6778585
+// Part 2 = 6534225
     $registerValues = array(0=>0,1=>0,2=>0,3=>0,4=>0,5=>0);
     $iterations = 0;
+    $registerHistory = array();
     while($instructionID < count($puzzleRows)) {
 
         $opcode = $instructions[$instructionID][0];
         $inputA = $instructions[$instructionID][1];
         $inputB = $instructions[$instructionID][2];
         $outputC = $instructions[$instructionID][3];
-        $registerValues[$instructionPointer] = $instructionPointerValue;
+        
         //echo "Opcode: $opcode Before :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br>";
-
+        
+        if($instructionPointerValue==28) {
+           echo $registerValues[5]."<br>";
+            //die();
+           if(in_array($registerValues[5],$registerHistory)) {
+               // Found the repeating value!
+               echo "Repeated value is ".$registerValues[5]. " so the last value before this would be ".end($registerHistory);
+               break;
+           }
+           $registerHistory[] = $registerValues[5];
+        }
+        $registerValues[$instructionPointer] = $instructionPointerValue;
+        
+        
+        
         if($opcode=='addr') {        
             // OppCode - addr - C=A+B
             $testValue = $registerValues[$inputA] + $registerValues[$inputB];
@@ -136,27 +152,37 @@ $instructionID = 0;
         } elseif($opcode=='eqrr') {
             // OppCode - eqrr - C=(A==B) ? 1:0
             $testValue = ($registerValues[$inputA]==$registerValues[$inputB]) ? 1:0;
-            echo "Before: Register 3 - ". $registerValues[4]." $instructionPointer; IPValues ".$registerValues[$instructionPointer]." - iterations: $iterations<br>";
+            //echo "Before: Register 3 $instructionPointerValue - ". $registerValues[4]." $instructionPointer; IPValues ".$registerValues[$instructionPointer]." - iterations: $iterations<br>";
             $registerValues[$outputC] = $testValue;  
-            echo "After: Register 3 - ". $registerValues[4]." $instructionPointer; IPValues ".$registerValues[$instructionPointer]." - iterations: $iterations<br>";
+            //echo "After: Register 3 $instructionPointerValue - ". $registerValues[4]." $instructionPointer; IPValues ".$registerValues[$instructionPointer]." - iterations: $iterations<br>";
         } else {
             echo "ERRORRR";
         }
         //echo "After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
-
+        
+        
+  
+        
+        
+        
         $instructionPointerValue = $registerValues[$instructionPointer];
         $instructionPointerValue++;
         $instructionID = $instructionPointerValue;
         $iterations++;
 
-        if($iterations % 100000 ==0) {
+
+
+        if($iterations % 1000000 ==0) {
             $time_post = microtime(true);
             $exec_time = $time_post - $time_pre;
-            //echo "Done iteration $iterations in $exec_time seconds<Br>";
+            echo "Done iteration $iterations in $exec_time seconds<Br>";
+            //$registerValues
+            $var = print_r($registerHistory,true);
+            //echo "<pre>$var</pre>"; 
             flush();
             ob_flush();
         }
-        if($iterations % 10000000000 ==0) {
+        if($iterations % 1000000000000 ==0) {
             echo "Failed to finish before the end count using register 0 value of <br>";
             //break 1;
         }
@@ -165,6 +191,6 @@ $instructionID = 0;
         echo "Finished :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
     }
 //}
-
+// 6534225
 echo "After :: IP = $instructionPointer; IPValues = ".$registerValues[$instructionPointer]." - RegisterValues: ".$registerValues[0]." ".$registerValues[1]." ".$registerValues[2]." ".$registerValues[3]." ".$registerValues[4]." ".$registerValues[5]."<br><br>";
     

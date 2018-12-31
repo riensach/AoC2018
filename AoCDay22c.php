@@ -13,6 +13,7 @@ $targetY = 10;
  */
  
  
+ 
 $caveGridArray = array();
 $caveGridArrayGeoIndex = array();
 
@@ -75,7 +76,7 @@ $timeToTargetArray = array();
 
 
 $time_pre = microtime(true);
-printGrid($caveGridArray);
+//printGrid($caveGridArray);
 
 flush();
 ob_flush();
@@ -100,13 +101,15 @@ $var = print_r($previousLocations,true);
 flush();
             ob_flush();
             $timeToGridLocation = array();
-moveLocation($caveGridArray,0,0,$targetY,$targetX,0,0,0,1,$previousLocations,$timeToTargetArray,1,0,1,"",$timeToGridLocation);
+moveLocation($caveGridArray,0,0,$targetY,$targetX,0,0,0,1,$previousLocations,$timeToTargetArray,1,0,1,"0,0",$timeToGridLocation,0,0);
 echo "<br><br>";
 $time_post = microtime(true);
             $exec_time = $time_post - $time_pre;
             echo "Done in $exec_time seconds<Br>";
 
-              asort($timeToTargetArray);
+              array_multisort(array_column($timeToTargetArray, 'totalTime'), SORT_ASC,
+                $timeToTargetArray);
+              echo "found a total of ".count($timeToTargetArray)." paths<br>";
 $var = print_r($timeToTargetArray,true);
 echo "<pre>$var</pre>";              
             
@@ -115,7 +118,7 @@ echo "<pre>$var</pre>";
 // For equipped item
 // 0 = neither, 1 = torch, 2 = climbing gear
 
-function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, $targetColumn, $lastRow, $lastColumn, $totalMoveMinutes, $equippedItem, $previousLocations, &$timeToTargetArray, $moveCount, $equippingItemTime,$myProcessID,$moveList,&$timeToGridLocation) {
+function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, $targetColumn, $lastRow, $lastColumn, $totalMoveMinutes, $equippedItem, $previousLocations, &$timeToTargetArray, $moveCount, $equippingItemTime,$myProcessID,$moveList,&$timeToGridLocation, $totalMoves, $totalChanges) {
     $isFound = 0;    
     
     while($isFound < 1) {
@@ -125,15 +128,20 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
             return;
         }
         
-        // We've gone too far 
-        if(count($timeToTargetArray)>100) {
-           $isFound = 1;
-            return; 
+        if(count($timeToTargetArray)>0) {
+            array_multisort(array_column($timeToTargetArray, 'totalTime'), SORT_ASC,
+                    $timeToTargetArray);
+            // We've gone too far 
+            //echo "got here -".$timeToTargetArray[0]['totalTime']." - ".count($timeToTargetArray)." ::";
+            if($totalMoveMinutes > $timeToTargetArray[0]['totalTime']) {
+               $isFound = 1;
+                return; 
+            }
         }
         // Check how long it's taken to get here. If I've got here with less expense before, go back
         if(!isset($timeToGridLocation["$currentRow,$currentColumn"])) {
-            $timeToGridLocation["$currentRow,$currentColumn"] = $totalMoveMinutes;
-        } elseif($timeToGridLocation["$currentRow,$currentColumn"] < $totalMoveMinutes) {
+            $timeToGridLocation["$currentRow,$currentColumn"] = $totalMoves;
+        } elseif($timeToGridLocation["$currentRow,$currentColumn"] < $totalMoves) {
             // I got here cheaper before, exit
             //echo "cheaper";
             //$isFound = 1;
@@ -141,7 +149,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
         } else {
             // This is the fastest I've got here. Add it to the array
            // print_r($timeToGridLocation);
-           $timeToGridLocation["$currentRow,$currentColumn"] = $totalMoveMinutes; 
+           $timeToGridLocation["$currentRow,$currentColumn"] = $totalMoves; 
         }
         $lastRow = $currentRow;
         $lastColumn = $currentColumn;
@@ -230,7 +238,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                 $equippingItemTime += 7;
                 $equippedItem = 1;
             }
-            $timeToTargetArray[] = $totalMoveMinutes;
+            $timeToTargetArray[] = array('totalTime' => $totalMoveMinutes,'previousMoves' => $moveList);
            // echo " - WE FOUND IT!!! Total move cost of: $totalMoveMinutes including a total cost of changing items of : $equippingItemTime<br>";
             flush();
             ob_flush();
@@ -256,6 +264,9 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                 if(isset($pathOptions[$tryMore])) {
                     // There are two options. Lets branch!
                     $moveCost = 0;
+                    $newMoveList = $moveList;
+                    $newTotalMoves = $totalMoves;
+                    $newTotalChanges = $totalChanges;
                     if($myProcessID==1) {
                         $newMyProcessID++;
                     }
@@ -269,7 +280,9 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                             $newEquippedItem = ($pathOptions[$tryMore]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                             $newTotalMoveMinutes = $totalMoveMinutes + 7;
                             $newEquippingItemTime += 7;
+                            $newTotalChanges++;
                             $moveCost = 7;
+                            
                         }
                         $newCurrentColumn = $currentColumn;
                         $newCurrentRow = $currentRow+1;    
@@ -280,6 +293,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                             $newEquippedItem = ($pathOptions[$tryMore]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                             $newTotalMoveMinutes = $totalMoveMinutes + 7;
                             $newEquippingItemTime += 7;
+                            $newTotalChanges++;
                             $moveCost = 7;
                         }
                         $newCurrentColumn = $currentColumn;
@@ -291,6 +305,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                             $newEquippedItem = ($pathOptions[$tryMore]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                             $newTotalMoveMinutes = $totalMoveMinutes + 7;
                             $newEquippingItemTime += 7;
+                            $newTotalChanges++;
                             $moveCost = 7;
                         }
                         $newCurrentColumn = $currentColumn-1;
@@ -302,16 +317,18 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                             $newEquippedItem = ($pathOptions[$tryMore]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                             $newTotalMoveMinutes = $totalMoveMinutes + 7;
                             $newEquippingItemTime += 7;
+                            $newTotalChanges++;
                             $moveCost = 7;
                         }
                         $newCurrentColumn = $currentColumn+1;
                         $newCurrentRow = $currentRow;                
                     }
+                    $newTotalMoves++;
                     $newMoveCount++;
                     $newTotalMoveMinutes++;
                     $newPreviousLocations = $previousLocations;
                     $newPreviousLocations[] = "$newCurrentRow,$newCurrentColumn";
-                    $moveList .= " :: $newCurrentRow,$newCurrentColumn";
+                    $newMoveList .= " :: $newCurrentRow,$newCurrentColumn";
 
 
 
@@ -319,7 +336,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                    // echo "Multiple options - Branching 1 - $alreadyBeenDown : $alreadyBeenUp : $alreadyBeenLeft :$alreadyBeenRight :: ".$pathOptions[$tryMore]['direction']."<br>";
 
                   //  echo "Moving to $newCurrentRow,$newCurrentColumn at a cost of $moveCost ($oldEquippedItem-$newEquippedItem) :: <br>";
-                    $myProcessID = moveLocation($caveGridArray,$newCurrentRow,$newCurrentColumn,$targetRow,$targetColumn,$lastRow,$lastColumn,$newTotalMoveMinutes,$newEquippedItem,$newPreviousLocations,$timeToTargetArray,$newMoveCount,$newEquippingItemTime,$newMyProcessID,$moveList,$timeToGridLocation);
+                    $myProcessID = moveLocation($caveGridArray,$newCurrentRow,$newCurrentColumn,$targetRow,$targetColumn,$lastRow,$lastColumn,$newTotalMoveMinutes,$newEquippedItem,$newPreviousLocations,$timeToTargetArray,$newMoveCount,$newEquippingItemTime,$newMyProcessID,$newMoveList,$timeToGridLocation, $newTotalMoves, $newTotalChanges);
                 }
                 $tryMore++;
             }
@@ -332,6 +349,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                     $equippedItem = ($pathOptions[0]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                     $totalMoveMinutes = $totalMoveMinutes + 7;
                     $equippingItemTime += 7;
+                    $totalChanges++;
                     $moveCost = 7;
                 }
                 $currentColumn = $currentColumn;
@@ -343,6 +361,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                     $equippedItem = ($pathOptions[0]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                     $totalMoveMinutes = $totalMoveMinutes + 7;
                     $equippingItemTime += 7;
+                    $totalChanges++;
                     $moveCost = 7;
                 }
                 $currentColumn = $currentColumn;
@@ -354,6 +373,7 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                     $equippedItem = ($pathOptions[0]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                     $totalMoveMinutes = $totalMoveMinutes + 7;
                     $equippingItemTime += 7;
+                    $totalChanges++;
                     $moveCost = 7;
                 }
                 $currentColumn = $currentColumn-1;
@@ -365,12 +385,13 @@ function moveLocation(&$caveGridArray, $currentRow, $currentColumn, $targetRow, 
                     $equippedItem = ($pathOptions[0]['terrain']=='|' && $currentTerrain=='.') ? 1:0;
                     $totalMoveMinutes = $totalMoveMinutes + 7;
                     $equippingItemTime += 7;
+                    $totalChanges++;
                     $moveCost = 7;
                 }
                 $currentColumn = $currentColumn+1;
                 $currentRow = $currentRow;                
             }
-            
+            $totalMoves++; 
             $moveCount++;      
             
             //echo "Moving to $currentRow,$currentColumn at a cost of $moveCost ($oldEquippedItem-$equippedItem) :: <br>";

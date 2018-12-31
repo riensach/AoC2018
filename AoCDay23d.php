@@ -1056,175 +1056,132 @@ $strongestY = $nanoArray[$strongestNanoRowID]['Y'];
 $strongestZ = $nanoArray[$strongestNanoRowID]['Z'];
 
 //ABS(X2-X1)^2+ABS(Y2-Y1)^2+ABS(Z2-Z1)^2)
-
-/*
- * Array
-(
-    [0] => Array
-        (
-            [X] => 47293868
-            [Y] => 21240727
-            [Z] => 12340798
-            [NanosWithinRange] => 899
-        )
-
-    [1] => Array
-        (
-            [X] => 47578745
-            [Y] => 20777037
-            [Z] => 11812447
-            [NanosWithinRange] => 899
- * 
- *    [0] => Array
-        (
-            [X] => 46837961
-            [Y] => 21576937
-            [Z] => 13341643
-            [NanosWithinRange] => 899
-        )
-
-    [1] => Array
-        (
-            [X] => 47672225
-            [Y] => 20877539
-            [Z] => 11881417
-            [NanosWithinRange] => 899
-        )
- *     [0] => Array
-        (
-            [X] => 45690199
-            [Y] => 22477764
-            [Z] => 13625097
-            [NanosWithinRange] => 899
-        )
-
-    [1] => Array
-        (
-            [X] => 46469177
-            [Y] => 21451156
-            [Z] => 12495991
-            [NanosWithinRange] => 899
-        )
-
-    [2] => Array
-        (
-            [X] => 47636265
-            [Y] => 20755091
-            [Z] => 11847910
-            [NanosWithinRange] => 899
-        )
- * 
- *     [0] => Array
-        (
-            [X] => 46350972
-            [Y] => 21343283
-            [Z] => 13099476
-            [NanosWithinRange] => 899
-        )
-
-    [1] => Array
-        (
-            [X] => 47171711
-            [Y] => 21282570
-            [Z] => 12308067
-            [NanosWithinRange] => 899
-        )
- */
+$highestX = 46156389;
+$lowestX = 44978069;
+$highestY = 22546861;
+$lowestY = 21276641;
+$highestZ = 13676567;
+$lowestZ = 12672527;
 
 echo "HighestX:$highestX Lowest X:$lowestX :: HighestY:$highestY Lowest Y:$lowestY :: Highestz:$highestZ Lowest z:$lowestZ<br>";
-//
-//// Going to seed my query data for now
-//$r = 0;
-//while($r < 100) {
-//    $possibleDistances = array();
-//    $i = 0;
-//    while($i<1000) {
-//        $possibleDistances[] = array('X' => $highestX, 'Y' => $highestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $lowestX, 'Y' => $lowestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $highestX, 'Y' => $lowestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $highestX, 'Y' => $lowestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $lowestX, 'Y' => $highestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $lowestX, 'Y' => $highestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
-//        $possibleDistances[] = array('X' => $highestX, 'Y' => $highestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0);
-//        $possibleDistances[] = array('X' => $lowestX, 'Y' => $lowestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
-//        $x = round($highestX-($highestX/10000*rand(0,10000)));
-//        $y = round($highestY-($highestY/10000*rand(0,10000)));
-//        $z = round($highestZ-($highestZ/10000*rand(0,10000)));
-//        $possibleDistances[] = array('X' => $x, 'Y' => $y, 'Z' => $z, 'NanosWithinRange' => 0); 
-//        $x2 = round($lowestX+($lowestX/10000*rand(0,10000)));
-//        $y2 = round($lowestY+($lowestY/10000*rand(0,10000)));
-//        $z2 = round($lowestZ+($lowestZ/10000*rand(0,10000)));
-//        $possibleDistances[] = array('X' => $x2, 'Y' => $y2, 'Z' => $z2, 'NanosWithinRange' => 0);    
-//        $possibleDistances[] = array('X' => $x, 'Y' => $y2, 'Z' => $z2, 'NanosWithinRange' => 0);     
-//        $possibleDistances[] = array('X' => $x, 'Y' => $y, 'Z' => $z2, 'NanosWithinRange' => 0);  
-//        $possibleDistances[] = array('X' => $x, 'Y' => $y2, 'Z' => $z, 'NanosWithinRange' => 0);     
-//        $possibleDistances[] = array('X' => $x2, 'Y' => $y, 'Z' => $z, 'NanosWithinRange' => 0);     
-//        $possibleDistances[] = array('X' => $x2, 'Y' => $y2, 'Z' => $z, 'NanosWithinRange' => 0);     
-//        $possibleDistances[] = array('X' => $x2, 'Y' => $y, 'Z' => $z2, 'NanosWithinRange' => 0); 
-//
-//
-//
-//        $i++;
-//    }
-//    $possibleDistances = array_map("unserialize", array_unique(array_map("serialize", $possibleDistances))); // Apparently removes duplicates
-//    $bestFoundNanosRangeValue = 0;
-//    $bestFoundNanosRange = array();
-//    foreach($possibleDistances as $distanceID => $distanceValues) {
-//        $nanosWithinRange = 0;
-//        foreach($nanoArray as $nanoArrayID => $nanoData) {
-//            $difference = (abs($distanceValues['X']-$nanoData['X'])+abs($distanceValues['Y']-$nanoData['Y'])+abs($distanceValues['Z']-$nanoData['Z']));
-//            if($difference<=$nanoData['range']) {            
-//                $nanosWithinRange++;
-//            }
-//
-//        }
-//        if($nanosWithinRange > $bestFoundNanosRangeValue) {
-//            $bestFoundNanosRangeValue = $nanosWithinRange;
-//            $bestFoundNanosRange = array('X' => $distanceValues['X'], 'Y' => $distanceValues['Y'], 'Z' => $distanceValues['Z'], 'NanosWithinRange' => $nanosWithinRange);  
-//        }
-//        $possibleDistances[$distanceID]['NanosWithinRange'] = $nanosWithinRange;
-//    }
-//     
-//    array_multisort(array_column($possibleDistances, 'NanosWithinRange'), SORT_DESC,
-//                        $possibleDistances);
-//    $chunkedArray = array_chunk($possibleDistances, 50);
-//    
-//    array_multisort(array_column($chunkedArray[0], 'X'), SORT_DESC,
-//                    $chunkedArray[0]);
-//    $highestX = $chunkedArray[0][0]['X']>$chunkedArray[0][49]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][49]['X'];    
-//    $lowestX = $chunkedArray[0][0]['X']<$chunkedArray[0][49]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][49]['X'];
-//    
-//    array_multisort(array_column($chunkedArray[0], 'Y'), SORT_DESC,
-//                    $chunkedArray[0]);    
-//    $highestY = $chunkedArray[0][0]['Y']>$chunkedArray[0][49]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][49]['Y'];
-//    $lowestY = $chunkedArray[0][0]['Y']<$chunkedArray[0][49]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][49]['Y'];
-//    
-//    array_multisort(array_column($chunkedArray[0], 'Z'), SORT_DESC,
-//                    $chunkedArray[0]);    
-//    $highestZ = $chunkedArray[0][0]['Z']>$chunkedArray[0][49]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][49]['Z'];
-//    $lowestZ = $chunkedArray[0][0]['Z']<$chunkedArray[0][49]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][49]['Z'];
-//    $r++;
-//
-//}        
-//        
-//echo count($possibleDistances);
-//
-//
-//$var = print_r($bestFoundNanosRange,true);
-//echo "<pre>$var</pre>";  
-//
-//
-//$var = print_r($possibleDistances,true);
-//echo "<pre>$var</pre>";  
-//
-//die();
-//
-//
-//
-//
-//
-//
-//
+
+// Going to seed my query data for now
+$r = 0;
+while($r < 3) {
+    $possibleDistances = array();
+    $i = 0;
+    while($i<20000) {
+        $possibleDistances[] = array('X' => $highestX, 'Y' => $highestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $lowestX, 'Y' => $lowestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $highestX, 'Y' => $lowestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $highestX, 'Y' => $lowestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $lowestX, 'Y' => $highestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $lowestX, 'Y' => $highestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0); 
+        $possibleDistances[] = array('X' => $highestX, 'Y' => $highestY, 'Z' => $lowestZ, 'NanosWithinRange' => 0);
+        $possibleDistances[] = array('X' => $lowestX, 'Y' => $lowestY, 'Z' => $highestZ, 'NanosWithinRange' => 0); 
+        $x = round($highestX-($i*rand(0,100)));
+        $y = round($highestY-($i*rand(0,100)));
+        $z = round($highestZ-($i*rand(0,100)));
+        $possibleDistances[] = array('X' => $x, 'Y' => $y, 'Z' => $z, 'NanosWithinRange' => 0); 
+        $x2 = round($lowestX+($i*rand(0,100)));
+        $y2 = round($lowestY+($i*rand(0,100)));
+        $z2 = round($lowestZ+($i*rand(0,100)));
+        $possibleDistances[] = array('X' => $x2, 'Y' => $y2, 'Z' => $z2, 'NanosWithinRange' => 0);    
+        $possibleDistances[] = array('X' => $x, 'Y' => $y2, 'Z' => $z2, 'NanosWithinRange' => 0);     
+        $possibleDistances[] = array('X' => $x, 'Y' => $y, 'Z' => $z2, 'NanosWithinRange' => 0);  
+        $possibleDistances[] = array('X' => $x, 'Y' => $y2, 'Z' => $z, 'NanosWithinRange' => 0);     
+        $possibleDistances[] = array('X' => $x2, 'Y' => $y, 'Z' => $z, 'NanosWithinRange' => 0);     
+        $possibleDistances[] = array('X' => $x2, 'Y' => $y2, 'Z' => $z, 'NanosWithinRange' => 0);     
+        $possibleDistances[] = array('X' => $x2, 'Y' => $y, 'Z' => $z2, 'NanosWithinRange' => 0); 
+
+
+        $i = $i + 10;
+        
+    }
+    $possibleDistances = array_map("unserialize", array_unique(array_map("serialize", $possibleDistances))); // Apparently removes duplicates
+    $bestFoundNanosRangeValue = 0;
+    $bestFoundNanosRange = array();
+    foreach($possibleDistances as $distanceID => $distanceValues) {
+        $nanosWithinRange = 0;
+        foreach($nanoArray as $nanoArrayID => $nanoData) {
+            $difference = (abs($distanceValues['X']-$nanoData['X'])+abs($distanceValues['Y']-$nanoData['Y'])+abs($distanceValues['Z']-$nanoData['Z']));
+            if($difference<=$nanoData['range']) {            
+                $nanosWithinRange++;
+            }
+
+        }
+        if($nanosWithinRange > $bestFoundNanosRangeValue) {
+            $bestFoundNanosRangeValue = $nanosWithinRange;
+            $bestFoundNanosRange = array('X' => $distanceValues['X'], 'Y' => $distanceValues['Y'], 'Z' => $distanceValues['Z'], 'NanosWithinRange' => $nanosWithinRange);  
+        }
+        $possibleDistances[$distanceID]['NanosWithinRange'] = $nanosWithinRange;
+    }
+     
+    array_multisort(array_column($possibleDistances, 'NanosWithinRange'), SORT_DESC,
+                        $possibleDistances);
+    $chunkedArray = array_chunk($possibleDistances, 51);
+    
+    array_multisort(array_column($chunkedArray[0], 'X'), SORT_DESC,
+                    $chunkedArray[0]);
+    $highestX = $chunkedArray[0][0]['X']>$chunkedArray[0][50]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][50]['X'];    
+    $lowestX = $chunkedArray[0][0]['X']<$chunkedArray[0][50]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][50]['X'];
+    
+    array_multisort(array_column($chunkedArray[0], 'Y'), SORT_DESC,
+                    $chunkedArray[0]);    
+    $highestY = $chunkedArray[0][0]['Y']>$chunkedArray[0][50]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][50]['Y'];
+    $lowestY = $chunkedArray[0][0]['Y']<$chunkedArray[0][50]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][50]['Y'];
+    
+    array_multisort(array_column($chunkedArray[0], 'Z'), SORT_DESC,
+                    $chunkedArray[0]);    
+    $highestZ = $chunkedArray[0][0]['Z']>$chunkedArray[0][50]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][50]['Z'];
+    $lowestZ = $chunkedArray[0][0]['Z']<$chunkedArray[0][50]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][50]['Z'];
+    $r++;
+
+}        
+        
+echo count($possibleDistances);
+
+
+$var = print_r($bestFoundNanosRange,true);
+echo "<pre>$var</pre>";  
+array_multisort(array_column($possibleDistances, 'NanosWithinRange'), SORT_DESC,
+                        $possibleDistances);
+    $chunkedArray = array_chunk($possibleDistances, 51);
+    
+    array_multisort(array_column($chunkedArray[0], 'X'), SORT_DESC,
+                    $chunkedArray[0]);
+    $highestX = $chunkedArray[0][0]['X']>$chunkedArray[0][50]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][50]['X'];    
+    $lowestX = $chunkedArray[0][0]['X']<$chunkedArray[0][50]['X'] ? $chunkedArray[0][0]['X']:$chunkedArray[0][50]['X'];
+    
+    array_multisort(array_column($chunkedArray[0], 'Y'), SORT_DESC,
+                    $chunkedArray[0]);    
+    $highestY = $chunkedArray[0][0]['Y']>$chunkedArray[0][50]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][50]['Y'];
+    $lowestY = $chunkedArray[0][0]['Y']<$chunkedArray[0][50]['Y'] ? $chunkedArray[0][0]['Y']:$chunkedArray[0][50]['Y'];
+    
+    array_multisort(array_column($chunkedArray[0], 'Z'), SORT_DESC,
+                    $chunkedArray[0]);    
+    $highestZ = $chunkedArray[0][0]['Z']>$chunkedArray[0][50]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][50]['Z'];
+    $lowestZ = $chunkedArray[0][0]['Z']<$chunkedArray[0][50]['Z'] ? $chunkedArray[0][0]['Z']:$chunkedArray[0][50]['Z'];
+    
+    echo '$highestX = '.$highestX.';<br>
+    $lowestX = '.$lowestX.';<br>
+    $highestY = '.$highestY.';<br>
+    $lowestY = '.$lowestY.';<br>
+    $highestZ = '.$highestZ.';<br>
+    $lowestZ = '.$lowestZ.';<Br>';
+  echo "HighestX:$highestX Lowest X:$lowestX :: HighestY:$highestY Lowest Y:$lowestY :: Highestz:$highestZ Lowest z:$lowestZ<br>";  
+
+$var = print_r($possibleDistances,true);
+echo "<pre>$var</pre>";  
+
+die();
+
+
+
+
+
+
+
 
 
 
@@ -1262,19 +1219,19 @@ $z = 13047405;
  * 
  * 
  */
-$x = 46325122;
-$y = 21390081;
-$z = 12447438;
-$highestX = '46325124';
-$highestY = '21390124';
-$highestZ = '12447482';
+$x = 46394000;
+$y = 21920006;
+$z = 13230000;
+$highestX = '46399990';
+$highestY = '21938776';
+$highestZ = '13240405';
 $possibleDistances = array();
 
     while($x <= $highestX) {
-        $y = 21390081;
-        $z = 12447438;
+        $y = 21920006;
+        $z = 13230000;
         while($y <= $highestY) {
-            $z = 12447438;
+            $z = 13230000;
             while($z < $highestZ) {
                 $nanosWithinRange = 0;
                 foreach($nanoArray as $nanoArrayID => $nanoData) {
@@ -1283,16 +1240,15 @@ $possibleDistances = array();
                         $nanosWithinRange++;
                     }
                 }
-                //$possibleDistances["$x-$y-$z"]['NanosWithinRange'] = $nanosWithinRange;
-                $possibleDistances["$x-$y-$z"] = array('X' => $x, 'Y' => $y, 'Z' => $z, 'NanosWithinRange' => $nanosWithinRange);
-                $z = $z + 1;
+                $possibleDistances["$x-$y-$z"]['NanosWithinRange'] = $nanosWithinRange;
+                $z = $z + 165;
             }
             $time_post = microtime(true);
             $exec_time = $time_post - $time_pre;
             echo "Done one loop of Z in $exec_time seconds - y now at $y<Br>";
             flush();
             ob_flush();
-            $y = $y + 1;
+            $y = $y + 1650;
            
         }
         $time_post = microtime(true);
@@ -1300,53 +1256,13 @@ $possibleDistances = array();
         echo "Done one loop of Z and Y in $exec_time seconds - z now at $z - x now at $x<Br>";
         flush();
         ob_flush();
-        $x = $x + 1;
+        $x = $x + 1350;
     }
     
 
 array_multisort(array_column($possibleDistances, 'NanosWithinRange'), SORT_DESC,
                     $possibleDistances);
 
-foreach($possibleDistances as $id => $value) {
-    echo $value['NanosWithinRange']."-";
-    if($value['NanosWithinRange'] < 913) {
-        unset($possibleDistances[$id]);
-    }
-}
-
-    array_multisort(array_column($possibleDistances, 'X'), SORT_DESC,
-                    $possibleDistances);
-    $highestX = reset($possibleDistances);       
-    $lowestX = end($possibleDistances);
-    
-    array_multisort(array_column($possibleDistances, 'Y'), SORT_DESC,
-                    $possibleDistances);    
-    $highestY = reset($possibleDistances);   
-    $lowestY = end($possibleDistances);
-    
-    array_multisort(array_column($possibleDistances, 'Z'), SORT_DESC,
-                    $possibleDistances);    
-    $highestZ = reset($possibleDistances);     
-    $lowestZ = end($possibleDistances);
-    
-    echo '$highestX = '.$highestX['X'].';<br>
-    $lowestX = '.$lowestX['X'].';<br>
-    $highestY = '.$highestY['Y'].';<br>
-    $lowestY = '.$lowestY['Y'].';<br>
-    $highestZ = '.$highestZ['Z'].';<br>
-    $lowestZ = '.$lowestZ['Z'].';<Br>';
-
-
-
-
-array_multisort(array_column($possibleDistances, 'NanosWithinRange'), SORT_DESC,
-                    $possibleDistances);
-$currentValues = current($possibleDistances);
-$difference = (abs(0-$currentValues['X'])+abs(0-$currentValues['Y'])+abs(0-$currentValues['Z']));
-echo "the answer is $difference<br>";
-
-// ANSWER IS 80162663
-// 
 //$possibleDistances = array_map("unserialize", array_unique(array_map("serialize", $possibleDistances))); // Apparently removes duplicates
 $var = print_r($possibleDistances,true);
 echo "<pre>$var</pre>";  
